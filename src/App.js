@@ -9,6 +9,7 @@ const LogsPage = lazy(() => import('./pages/LogsPage'));
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
 const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const ToolsPage = lazy(() => import('./pages/ToolsPage'));
+const NewsPage = lazy(() => import('./pages/NewsPage'));
 
 const pages = {
   dashboard: DashboardPage,
@@ -16,6 +17,7 @@ const pages = {
   marketplace: MarketplacePage,
   community: CommunityPage,
   tools: ToolsPage,
+  news: NewsPage,
 };
 
 function getInitialRoute() {

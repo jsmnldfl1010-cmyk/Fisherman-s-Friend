@@ -5,16 +5,30 @@ import { Button } from '../components/ui/Button';
 import { useAppData } from '../services/AppDataContext';
 import { getSeaConditions } from '../services/mockApi';
 import { formatDate } from '../utils/sampleData';
+import { getNewsItems, getWeatherSnapshot, loadOfflinePack } from '../services/fishingAssistant';
 
 export default function DashboardPage({ onNavigate }) {
   const { alerts, dataSource, error, isLoading, logs, products, productiveZones, voiceCommands } = useAppData();
   const [conditions, setConditions] = useState(null);
+  const [smartWeather, setSmartWeather] = useState(getWeatherSnapshot(6.12, 125.17));
+  const news = getNewsItems();
+  const offlinePack = loadOfflinePack();
 
   useEffect(() => {
     let mounted = true;
     getSeaConditions().then((data) => {
       if (mounted) setConditions(data);
     });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (mounted) {
+            setSmartWeather(getWeatherSnapshot(position.coords.latitude, position.coords.longitude));
+          }
+        },
+        () => {}
+      );
+    }
     return () => {
       mounted = false;
     };
@@ -71,6 +85,7 @@ export default function DashboardPage({ onNavigate }) {
         <MetricCard icon="CE" label="Catch entries" value={logs.length} note={`Stored in ${dataSource}`} />
         <MetricCard icon="ML" label="Market listings" value={products.length} note="Synced for buyers" />
         <MetricCard icon="TZ" label="Trusted zones" value={productiveZones.length} note="Shared by cooperative networks" />
+        <MetricCard icon="OF" label="Offline pack" value={offlinePack ? 'Yes' : 'No'} note="Maps, weather, fish guide" />
       </section>
       {error ? <p className="status-error">{error}</p> : null}
       {isLoading ? <p className="card-description">Loading cooperative data from Supabase...</p> : null}
@@ -88,6 +103,13 @@ export default function DashboardPage({ onNavigate }) {
                 <span className="badge">{command.language}</span>
               </div>
             ))}
+          </div>
+        </Card>
+        <Card>
+          <CardHeader title="Smart weather and hazard" action={<Button variant="secondary" onClick={() => onNavigate('tools')}>Open</Button>} />
+          <div className="list">
+            <div className="list-item"><span>Wind and wave</span><strong>{smartWeather.windKts} kts / {smartWeather.waveM} m</strong></div>
+            <div className="list-item"><span>Risk level</span><span className={`badge ${smartWeather.hazard ? 'badge-warning' : 'badge-success'}`}>{smartWeather.hazard ? 'Caution' : 'Normal'}</span></div>
           </div>
         </Card>
         <Card>
@@ -132,6 +154,22 @@ export default function DashboardPage({ onNavigate }) {
                 </div>
                 <span className="badge">{formatDate(log.createdAt)}</span>
               </div>
+            ))}
+          </div>
+        </Card>
+      </section>
+      <section className="two-column-grid">
+        <Card>
+          <CardHeader title="News and updates" action={<Button variant="secondary" onClick={() => onNavigate('news')}>Read</Button>} />
+          <div className="list">
+            {news.slice(0, 2).map((item) => (
+              <article className="list-item" key={item.id}>
+                <div>
+                  <p className="list-item-title">{item.title}</p>
+                  <p className="list-item-meta">{item.text}</p>
+                </div>
+                <span className="badge">{item.type}</span>
+              </article>
             ))}
           </div>
         </Card>

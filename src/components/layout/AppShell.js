@@ -3,17 +3,19 @@ import { Button } from '../ui/Button';
 const navigation = [
   { id: 'dashboard', label: 'Dashboard', icon: 'DB' },
   { id: 'logs', label: 'Catch logs', icon: 'CL' },
-  { id: 'marketplace', label: 'Market', icon: '$' },
-  { id: 'community', label: 'Alerts', icon: '!' },
-  { id: 'tools', label: 'Sea tools', icon: '+' },
+  { id: 'marketplace', label: 'E-pay', icon: '$' },
+  { id: 'community', label: 'Community', icon: 'CM' },
+  { id: 'tools', label: 'Smart tools', icon: 'ST' },
+  { id: 'news', label: 'News', icon: 'NW' },
 ];
 
 const titles = {
   dashboard: 'Harbor dashboard',
   logs: 'Catch tracking',
   marketplace: 'Coastal marketplace',
-  community: 'Community alerts',
-  tools: 'Sea tools',
+  community: 'Community catch network',
+  tools: 'Smart fishing tools',
+  news: 'News & updates',
 };
 
 export function AppShell({ activeRoute, children, onNavigate }) {

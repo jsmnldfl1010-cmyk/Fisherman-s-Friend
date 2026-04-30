@@ -6,13 +6,14 @@ import {
   isSupabaseConfigured,
   loadSupabaseAppData,
 } from './supabaseRest';
+import { initialAlerts, initialLogs, initialProducts, productiveZones, voiceCommands } from '../utils/sampleData';
 
 const emptyData = {
-  alerts: [],
-  logs: [],
-  products: [],
-  productiveZones: [],
-  voiceCommands: [],
+  alerts: initialAlerts,
+  logs: initialLogs,
+  products: initialProducts,
+  productiveZones,
+  voiceCommands,
 };
 
 const AppDataContext = createContext(null);
@@ -25,8 +26,9 @@ export function AppDataProvider({ children }) {
 
   const refreshData = useCallback(async () => {
     if (!isSupabaseConfigured) {
+      setData(emptyData);
       setIsLoading(false);
-      setDataSource('Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY');
+      setDataSource('Offline-first local dataset');
       return;
     }
 
@@ -50,16 +52,31 @@ export function AppDataProvider({ children }) {
   }, [refreshData]);
 
   const addLog = useCallback(async (log) => {
+    if (!isSupabaseConfigured) {
+      const offlineLog = { ...log, id: `log-local-${Date.now()}`, createdAt: new Date().toISOString() };
+      setData((current) => ({ ...current, logs: [offlineLog, ...current.logs] }));
+      return;
+    }
     const savedLog = await createCatchLog(log);
     setData((current) => ({ ...current, logs: [savedLog, ...current.logs] }));
   }, []);
 
   const addProduct = useCallback(async (product) => {
+    if (!isSupabaseConfigured) {
+      const offlineProduct = { ...product, id: `product-local-${Date.now()}`, icon: product.category === 'Fish' ? '<>' : product.category === 'Equipment' ? '[]' : '#' };
+      setData((current) => ({ ...current, products: [offlineProduct, ...current.products] }));
+      return;
+    }
     const savedProduct = await createMarketplaceListing(product);
     setData((current) => ({ ...current, products: [savedProduct, ...current.products] }));
   }, []);
 
   const addAlert = useCallback(async (alert) => {
+    if (!isSupabaseConfigured) {
+      const offlineAlert = { ...alert, id: `alert-local-${Date.now()}`, createdAt: new Date().toISOString() };
+      setData((current) => ({ ...current, alerts: [offlineAlert, ...current.alerts] }));
+      return;
+    }
     const savedAlert = await createCommunityAlert(alert);
     setData((current) => ({ ...current, alerts: [savedAlert, ...current.alerts] }));
   }, []);

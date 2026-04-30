@@ -746,6 +746,55 @@
   padding: 1rem 1.2rem;
 }
 
+.live-map {
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  height: 21rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.map-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill-toggle {
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 2.2rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.pill-toggle.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.map-status {
+  color: var(--color-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.result-panel {
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+}
+
+.alert-strip.danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
 @media (max-width: 980px) {
   .app-layout {
     grid-template-columns: 1fr;
@@ -759,7 +808,7 @@
   }
 
   .nav-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     overflow-x: auto;
   }
 
@@ -818,5 +867,9 @@
 
   .voice-command-grid {
     grid-template-columns: 1fr;
+  }
+
+  .live-map {
+    height: 16rem;
   }
 }

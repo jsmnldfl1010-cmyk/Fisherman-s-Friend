@@ -7,7 +7,7 @@ import { formatDate } from '../utils/sampleData';
 const initialForm = { title: '', level: 'Safety', message: '' };
 
 export default function CommunityPage() {
-  const { addAlert, alerts, dataSource, error, isLoading } = useAppData();
+  const { addAlert, alerts, dataSource, error, isLoading, logs } = useAppData();
   const [form, setForm] = useState(initialForm);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -28,7 +28,30 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="two-column-grid">
+    <div className="page-grid">
+      <Card>
+        <CardHeader title="Community catch hotspots" description="Shared catch logs generate a cooperative activity map for likely fishing hotspots." />
+        <div className="list">
+          {Object.entries(logs.reduce((acc, log) => {
+            const key = log.location || 'Unmarked';
+            acc[key] = (acc[key] ?? 0) + 1;
+            return acc;
+          }, {}))
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([location, count]) => (
+              <article className="list-item" key={location}>
+                <div>
+                  <p className="list-item-title">{location}</p>
+                  <p className="list-item-meta">Community catches: {count}</p>
+                </div>
+                <span className="badge badge-success">Hotspot</span>
+              </article>
+            ))}
+        </div>
+      </Card>
+
+      <section className="two-column-grid">
       <Card>
         <CardHeader title="Post alert" description="Share safety, market, weather, or operations updates in Supabase." />
         <form className="form-grid" onSubmit={handleSubmit}>
@@ -72,6 +95,7 @@ export default function CommunityPage() {
           ))}
         </div>
       </Card>
+      </section>
     </div>
   );
 }

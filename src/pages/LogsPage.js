@@ -4,7 +4,7 @@ import { Card, CardHeader } from '../components/ui/Card';
 import { useAppData } from '../services/AppDataContext';
 import { formatDate } from '../utils/sampleData';
 
-const initialForm = { species: '', weight: '', location: '', notes: '' };
+const initialForm = { species: '', weight: '', sizeCm: '', location: '', notes: '' };
 
 export default function LogsPage() {
   const { addLog, dataSource, error, isLoading, logs } = useAppData();
@@ -20,7 +20,8 @@ export default function LogsPage() {
     event.preventDefault();
     setIsSaving(true);
     try {
-      await addLog(form);
+      const notesWithSize = form.sizeCm ? `Size: ${form.sizeCm} cm. ${form.notes}`.trim() : form.notes;
+      await addLog({ ...form, notes: notesWithSize });
       setForm(initialForm);
     } finally {
       setIsSaving(false);
@@ -39,6 +40,10 @@ export default function LogsPage() {
           <label className="field">
             <span className="label">Weight or count</span>
             <input className="input" name="weight" onChange={handleChange} required value={form.weight} />
+          </label>
+          <label className="field field-full">
+            <span className="label">Fish size (cm)</span>
+            <input className="input" name="sizeCm" onChange={handleChange} value={form.sizeCm} />
           </label>
           <label className="field field-full">
             <span className="label">Location</span>
