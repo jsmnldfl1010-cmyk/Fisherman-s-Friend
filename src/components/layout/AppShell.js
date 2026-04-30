@@ -7,6 +7,7 @@ const navigation = [
   { id: 'community', label: 'Community', icon: 'CM' },
   { id: 'tools', label: 'Smart tools', icon: 'ST' },
   { id: 'news', label: 'News', icon: 'NW' },
+  { id: 'sos', label: 'SOS', icon: 'SOS' },
 ];
 
 const titles = {
@@ -16,6 +17,7 @@ const titles = {
   community: 'Community catch network',
   tools: 'Smart fishing tools',
   news: 'News & updates',
+  sos: 'Emergency SOS',
 };
 
 export function AppShell({ activeRoute, children, onNavigate }) {

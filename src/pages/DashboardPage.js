@@ -54,6 +54,7 @@ export default function DashboardPage({ onNavigate }) {
           <div className="hero-actions">
             <Button variant="ghost" onClick={() => onNavigate('tools')}>Open sea mode</Button>
             <Button variant="ghost" onClick={() => onNavigate('logs')}>Voice catch log</Button>
+            <Button onClick={() => onNavigate('sos')}>SOS emergency</Button>
           </div>
         </Card>
         <Card className="weather-alert-card">
@@ -125,6 +126,12 @@ export default function DashboardPage({ onNavigate }) {
               </article>
             ))}
           </div>
+        </Card>
+      </section>
+
+      <section className="two-column-grid">
+        <Card className="sos-strip">
+          <CardHeader title="Emergency quick access" description="Press-and-hold SOS with GPS, coast guard contacts, and offline fallback." action={<Button onClick={() => onNavigate('sos')}>Open SOS</Button>} />
         </Card>
       </section>
 

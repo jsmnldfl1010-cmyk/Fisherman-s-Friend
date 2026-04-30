@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card, CardHeader } from '../components/ui/Card';
 import { useAppData } from '../services/AppDataContext';
+import { getFishLegality, getGuidedInputOptions } from '../services/fishingAssistant';
 
-const initialForm = { name: '', category: 'Fish', price: '', seller: '' };
+const initialForm = { name: 'Bangus (Milkfish)', category: 'Fish', price: '', seller: '', equipmentType: 'Net', location: 'Sarangani Bay', kilo: '', catchDate: '' };
 const initialCheckout = { useCase: 'Permit', item: '', amount: '', method: 'GCash' };
 
 export default function MarketplacePage() {
@@ -13,6 +14,9 @@ export default function MarketplacePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [checkout, setCheckout] = useState(initialCheckout);
   const [paymentStatus, setPaymentStatus] = useState('');
+  const [warning, setWarning] = useState('');
+  const [chatTarget, setChatTarget] = useState('');
+  const options = getGuidedInputOptions('en');
 
   const filteredProducts = useMemo(
     () => (category === 'All' ? products : products.filter((product) => product.category === category)),
@@ -28,8 +32,17 @@ export default function MarketplacePage() {
     event.preventDefault();
     setIsSaving(true);
     try {
-      await addProduct(form);
+      if (form.category === 'Fish') {
+        const legality = getFishLegality(form.name, 50);
+        if (!legality.legal) {
+          setWarning(`Restricted species warning: ${form.name} should not be sold. Recommendation: ${legality.recommendation}.`);
+          return;
+        }
+      }
+      const autoPrice = form.category === 'Fish' && form.kilo ? `PHP ${(Number(form.kilo) * 220).toFixed(0)}` : form.price;
+      await addProduct({ ...form, price: autoPrice || form.price, seller: `${form.seller} (${form.location})` });
       setForm(initialForm);
+      setWarning('');
     } finally {
       setIsSaving(false);
     }
@@ -70,10 +83,7 @@ export default function MarketplacePage() {
           <label className="field">
             <span className="label">Payment method</span>
             <select className="select" name="method" onChange={handleCheckoutChange} value={checkout.method}>
-              <option>GCash</option>
-              <option>Maya</option>
-              <option>Credit/Debit Card</option>
-              <option>Online Banking</option>
+              {options.paymentMethods.map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
           <div className="field-full">
@@ -88,11 +98,13 @@ export default function MarketplacePage() {
         <form className="form-grid" onSubmit={handleSubmit}>
           <label className="field">
             <span className="label">Item name</span>
-            <input className="input" name="name" onChange={handleChange} required value={form.name} />
+            <select className="select select-large" name="name" onChange={handleChange} value={form.name}>
+              {options.fishSpecies.map((item) => <option key={item.value} value={item.value}>{item.icon} {item.value}</option>)}
+            </select>
           </label>
           <label className="field">
             <span className="label">Category</span>
-            <select className="select" name="category" onChange={handleChange} value={form.category}>
+            <select className="select select-large" name="category" onChange={handleChange} value={form.category}>
               <option>Fish</option>
               <option>Supplies</option>
               <option>Equipment</option>
@@ -100,17 +112,38 @@ export default function MarketplacePage() {
             </select>
           </label>
           <label className="field">
-            <span className="label">Price</span>
+            <span className="label">Base price</span>
             <input className="input" name="price" onChange={handleChange} required value={form.price} />
+          </label>
+          <label className="field">
+            <span className="label">Fish kilos</span>
+            <input className="input" name="kilo" onChange={handleChange} value={form.kilo} />
+          </label>
+          <label className="field">
+            <span className="label">Equipment type</span>
+            <select className="select select-large" name="equipmentType" onChange={handleChange} value={form.equipmentType}>
+              {options.equipmentTypes.map((item) => <option key={item}>🧰 {item}</option>)}
+            </select>
           </label>
           <label className="field">
             <span className="label">Seller</span>
             <input className="input" name="seller" onChange={handleChange} required value={form.seller} />
           </label>
+          <label className="field">
+            <span className="label">Location</span>
+            <select className="select select-large" name="location" onChange={handleChange} value={form.location}>
+              {options.locations.map((item) => <option key={item.value}>{item.value}</option>)}
+            </select>
+          </label>
+          <label className="field">
+            <span className="label">Catch date</span>
+            <input className="input" name="catchDate" onChange={handleChange} type="date" value={form.catchDate} />
+          </label>
           <div className="field-full">
             <Button disabled={isSaving} type="submit">{isSaving ? 'Publishing...' : 'Publish listing'}</Button>
           </div>
         </form>
+        {warning ? <p className="status-error">{warning}</p> : null}
       </Card>
 
       <Card>
@@ -141,9 +174,11 @@ export default function MarketplacePage() {
                 <span className="badge badge-success">{product.category}</span>
               </div>
               <strong>{product.price}</strong>
+              <Button variant="secondary" type="button" onClick={() => setChatTarget(product.seller)}>Contact</Button>
             </article>
           ))}
         </div>
+        {chatTarget ? <p className="card-description">Contact option opened for: {chatTarget}. Use GCash-ready checkout above for payment.</p> : null}
       </Card>
     </div>
   );

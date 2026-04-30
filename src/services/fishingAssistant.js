@@ -26,6 +26,55 @@ const fishRules = {
 };
 
 const fishSpecies = Object.keys(fishRules);
+const languageLabels = {
+  en: {
+    fishSpecies: 'Fish species',
+    fishingMethod: 'Fishing method',
+    location: 'Location',
+    emergencyType: 'Emergency type',
+    equipmentType: 'Equipment type',
+  },
+  fil: {
+    fishSpecies: 'Uri ng isda',
+    fishingMethod: 'Paraan ng pangingisda',
+    location: 'Lokasyon',
+    emergencyType: 'Uri ng emerhensiya',
+    equipmentType: 'Uri ng kagamitan',
+  },
+  ceb: {
+    fishSpecies: 'Klase sa isda',
+    fishingMethod: 'Pamaagi sa pangisda',
+    location: 'Lokasyon',
+    emergencyType: 'Matang sa emerhensiya',
+    equipmentType: 'Klase sa gamit',
+  },
+};
+
+const commonInputs = {
+  fishSpecies: [
+    { value: 'Bangus (Milkfish)', icon: '🐟', aliases: ['Bangus', 'Milkfish'] },
+    { value: 'Lapu-lapu (Grouper)', icon: '🐠', aliases: ['Lapu-lapu', 'Grouper'] },
+    { value: 'Yellowfin Tuna', icon: '🎣', aliases: ['Tambakol', 'Tuna'] },
+    { value: 'Humphead Wrasse', icon: '🐡', aliases: ['Mameng', 'Wrasse'] },
+  ],
+  fishingMethods: [
+    { value: 'Handline', icon: '🪝' },
+    { value: 'Gill net', icon: '🕸️' },
+    { value: 'Hook and line', icon: '🎣' },
+    { value: 'Longline', icon: '📏' },
+  ],
+  locations: [
+    { value: 'Sarangani Bay', icon: '📍' },
+    { value: 'Davao Gulf', icon: '📍' },
+    { value: 'Mindoro Strait', icon: '📍' },
+    { value: 'Palawan Shelf', icon: '📍' },
+  ],
+  weatherConditionChoices: ['Clear', 'Cloudy', 'Light Rain', 'Rough Sea'],
+  catchTypes: ['Single catch', 'Net catch', 'Mixed catch'],
+  emergencyTypes: ['Accident', 'Engine failure', 'Bad weather', 'Illegal activity'],
+  equipmentTypes: ['Net', 'Rod', 'Bait', 'Hooks', 'Cooler'],
+  paymentMethods: ['GCash', 'Maya', 'Credit/Debit Card', 'Online Banking'],
+};
 
 const offlineKey = 'fishermans_offline_pack_v2';
 
@@ -132,11 +181,33 @@ export function getFishSpeciesCatalog() {
   return fishSpecies.map((name) => ({ name, ...fishRules[name] }));
 }
 
+export function getGuidedInputOptions(language = 'en') {
+  return {
+    labels: languageLabels[language] ?? languageLabels.en,
+    ...commonInputs,
+  };
+}
+
+export function getSpeciesSuggestions(query) {
+  const needle = String(query ?? '').trim().toLowerCase();
+  if (!needle) return commonInputs.fishSpecies;
+  return commonInputs.fishSpecies.filter((item) =>
+    item.value.toLowerCase().includes(needle) || item.aliases.some((alias) => alias.toLowerCase().includes(needle))
+  );
+}
+
 export function getNewsItems() {
   return [
     { id: 'news-1', date: '2026-04-29', title: 'Regional monsoon shift watch', type: 'Advisory', text: 'Expect wind direction changes across Visayas and northern Mindanao this week.' },
     { id: 'news-2', date: '2026-04-26', title: 'Seasonal reef rest window announced', type: 'Regulation', text: 'Selected municipal waters are enforcing temporary reef recovery schedules.' },
     { id: 'news-3', date: '2026-04-25', title: 'Mangrove rehabilitation update', type: 'Environment', text: 'Community mangrove restoration expanded near key nursery zones.' },
+  ];
+}
+
+export function getEmergencyContacts() {
+  return [
+    { id: 'pcg', name: 'Philippine Coast Guard', contact: 'PCG hotline', type: 'Official' },
+    { id: 'bfar', name: 'BFAR Regional Desk', contact: 'BFAR quick line', type: 'Official' },
   ];
 }
 

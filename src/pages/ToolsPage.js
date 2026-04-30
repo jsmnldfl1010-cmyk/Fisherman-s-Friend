@@ -8,7 +8,9 @@ import {
   getMapLayers,
   getNearbySafetyPoints,
   getRestrictedAreaAlert,
+  getSpeciesSuggestions,
   getWeatherSnapshot,
+  getGuidedInputOptions,
   hasGoogleMapsKey,
   identifyFishFromImage,
   loadOfflinePack,
@@ -25,9 +27,14 @@ export default function ToolsPage() {
   const [photoFile, setPhotoFile] = useState(null);
   const [fishSize, setFishSize] = useState('');
   const [fishResult, setFishResult] = useState(null);
+  const [speciesQuery, setSpeciesQuery] = useState('Bangus');
+  const [language, setLanguage] = useState('en');
   const [offlinePackInfo, setOfflinePackInfo] = useState(loadOfflinePack());
+  const [demoMode, setDemoMode] = useState(false);
   const { fishingSpots, restrictedZones, safetyPoints } = useMemo(() => getMapLayers(), []);
   const speciesCatalog = useMemo(() => getFishSpeciesCatalog(), []);
+  const speciesOptions = useMemo(() => getSpeciesSuggestions(speciesQuery), [speciesQuery]);
+  const options = getGuidedInputOptions(language);
 
   const mapUrl = useMemo(() => buildGoogleMapsEmbedUrl(coords.lat, coords.lng, satellite), [coords, satellite]);
 
@@ -43,8 +50,14 @@ export default function ToolsPage() {
         setCoords(nextCoords);
         setLocationStatus(`${nextCoords.lat.toFixed(4)}, ${nextCoords.lng.toFixed(4)}`);
         setWeather(getWeatherSnapshot(nextCoords.lat, nextCoords.lng));
-        setZoneAlert(getRestrictedAreaAlert(nextCoords.lat, nextCoords.lng) ?? 'No restricted area breach detected.');
+        const alert = getRestrictedAreaAlert(nextCoords.lat, nextCoords.lng) ?? 'No restricted area breach detected.';
+        setZoneAlert(alert);
         setNearbyPoints(getNearbySafetyPoints(nextCoords.lat, nextCoords.lng));
+        if (alert.includes('should stop')) {
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+          const utter = new SpeechSynthesisUtterance(`Critical warning. ${alert}`);
+          window.speechSynthesis?.speak(utter);
+        }
       },
       () => setLocationStatus('GPS permission needed')
     );
@@ -55,6 +68,16 @@ export default function ToolsPage() {
     const species = await identifyFishFromImage(photoFile);
     const legality = getFishLegality(species, fishSize);
     setFishResult({ species, legality });
+  };
+
+  const activateDemoMode = () => {
+    setDemoMode(true);
+    setLocationStatus('Demo mode active');
+    const nextCoords = { lat: 8.95, lng: 119.9 };
+    setCoords(nextCoords);
+    setWeather(getWeatherSnapshot(nextCoords.lat, nextCoords.lng));
+    setZoneAlert(getRestrictedAreaAlert(nextCoords.lat, nextCoords.lng) ?? '');
+    setNearbyPoints(getNearbySafetyPoints(nextCoords.lat, nextCoords.lng));
   };
 
   const handleDownloadOffline = () => {
@@ -78,6 +101,7 @@ export default function ToolsPage() {
         <div className="map-controls">
           <button className={`pill-toggle ${!satellite ? 'active' : ''}`} onClick={() => setSatellite(false)} type="button">Road</button>
           <button className={`pill-toggle ${satellite ? 'active' : ''}`} onClick={() => setSatellite(true)} type="button">Satellite</button>
+          <button className={`pill-toggle ${demoMode ? 'active' : ''}`} onClick={activateDemoMode} type="button">Demo</button>
           <span className="map-status">Position: {locationStatus}</span>
         </div>
         {hasGoogleMapsKey() ? (
@@ -88,6 +112,11 @@ export default function ToolsPage() {
           </div>
         )}
         <p className="card-description">Set `REACT_APP_GOOGLE_MAPS_API_KEY` to enable live Google Maps tiles and satellite rendering.</p>
+        <div className="legend-row">
+          <span><i className="legend-dot danger" /> Restricted zone</span>
+          <span><i className="legend-dot caution" /> Caution / reef</span>
+          <span><i className="legend-dot safe" /> Safe docking</span>
+        </div>
       </Card>
 
       <section className="two-column-grid">
@@ -126,7 +155,22 @@ export default function ToolsPage() {
       <section className="two-column-grid">
         <Card>
           <CardHeader title="Fish camera and legality check" description="Capture a fish photo, detect likely species, then get Philippine keep-or-release guidance." />
+          <div className="map-controls">
+            <button className={`pill-toggle ${language === 'en' ? 'active' : ''}`} type="button" onClick={() => setLanguage('en')}>English</button>
+            <button className={`pill-toggle ${language === 'fil' ? 'active' : ''}`} type="button" onClick={() => setLanguage('fil')}>Filipino</button>
+            <button className={`pill-toggle ${language === 'ceb' ? 'active' : ''}`} type="button" onClick={() => setLanguage('ceb')}>Bisaya</button>
+          </div>
           <div className="form-grid">
+            <label className="field">
+              <span className="label">{options.labels.fishSpecies}</span>
+              <input className="input" onChange={(event) => setSpeciesQuery(event.target.value)} value={speciesQuery} />
+            </label>
+            <label className="field">
+              <span className="label">Suggested species</span>
+              <select className="select select-large" onChange={(event) => setSpeciesQuery(event.target.value)} value={speciesOptions[0]?.value ?? ''}>
+                {speciesOptions.map((item) => <option key={item.value} value={item.value}>{item.icon} {item.aliases.join(' / ')} ({item.value})</option>)}
+              </select>
+            </label>
             <label className="field field-full">
               <span className="label">Fish photo</span>
               <input className="input" accept="image/*" capture="environment" onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)} type="file" />
@@ -144,6 +188,7 @@ export default function ToolsPage() {
               <p className="list-item-title">{fishResult.species}</p>
               <p className="list-item-meta">Local name: {fishResult.legality.details.local}</p>
               <p className="list-item-meta">{fishResult.legality.details.regulation}</p>
+              <p className="list-item-meta">English: {fishResult.species} | Local: {fishResult.legality.details.local}</p>
               <p className="list-item-meta">Result: {fishResult.legality.reason}</p>
               <span className={`badge ${fishResult.legality.legal ? 'badge-success' : 'badge-warning'}`}>Recommendation: {fishResult.legality.recommendation}</span>
             </div>
