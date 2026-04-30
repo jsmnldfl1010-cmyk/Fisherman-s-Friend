@@ -130,6 +130,10 @@ export default function DashboardPage({ onNavigate }) {
       </section>
 
       <section className="two-column-grid">
+        <Card>
+          <CardHeader title="Fuel price tracker" description="Diesel and gasoline monitoring for Antique and nearby ports." action={<Button variant="secondary" onClick={() => onNavigate('fuel')}>Open</Button>} />
+          <p className="card-description">Compare nearby station prices, check trend direction, and set diesel drop alerts.</p>
+        </Card>
         <Card className="sos-strip">
           <CardHeader title="Emergency quick access" description="Press-and-hold SOS with GPS, coast guard contacts, and offline fallback." action={<Button onClick={() => onNavigate('sos')}>Open SOS</Button>} />
         </Card>

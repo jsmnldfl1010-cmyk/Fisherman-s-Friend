@@ -11,6 +11,7 @@ const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 const ToolsPage = lazy(() => import('./pages/ToolsPage'));
 const NewsPage = lazy(() => import('./pages/NewsPage'));
 const SosPage = lazy(() => import('./pages/SosPage'));
+const FuelPage = lazy(() => import('./pages/FuelPage'));
 
 const pages = {
   dashboard: DashboardPage,
@@ -20,6 +21,7 @@ const pages = {
   tools: ToolsPage,
   news: NewsPage,
   sos: SosPage,
+  fuel: FuelPage,
 };
 
 function getInitialRoute() {

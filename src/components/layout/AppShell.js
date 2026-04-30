@@ -7,6 +7,7 @@ const navigation = [
   { id: 'community', label: 'Community', icon: 'CM' },
   { id: 'tools', label: 'Smart tools', icon: 'ST' },
   { id: 'news', label: 'News', icon: 'NW' },
+  { id: 'fuel', label: 'Fuel', icon: 'FL' },
   { id: 'sos', label: 'SOS', icon: 'SOS' },
 ];
 
@@ -17,6 +18,7 @@ const titles = {
   community: 'Community catch network',
   tools: 'Smart fishing tools',
   news: 'News & updates',
+  fuel: 'Fuel price tracker',
   sos: 'Emergency SOS',
 };
 

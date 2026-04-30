@@ -77,6 +77,7 @@ const commonInputs = {
 };
 
 const offlineKey = 'fishermans_offline_pack_v2';
+const fuelCacheKey = 'fishermans_fuel_cache_v1';
 
 function toRad(value) {
   return (value * Math.PI) / 180;
@@ -209,6 +210,37 @@ export function getEmergencyContacts() {
     { id: 'pcg', name: 'Philippine Coast Guard', contact: 'PCG hotline', type: 'Official' },
     { id: 'bfar', name: 'BFAR Regional Desk', contact: 'BFAR quick line', type: 'Official' },
   ];
+}
+
+export function getFuelStations() {
+  return [
+    { id: 'fuel-1', name: 'San Jose Port Fuel Hub', area: 'San Jose, Antique', lat: 10.747, lng: 121.941, diesel: 55.4, gas: 69.2, nearPort: true, trend: 'dropping' },
+    { id: 'fuel-2', name: 'Culasi Coastal Station', area: 'Culasi, Antique', lat: 11.427, lng: 122.065, diesel: 56.1, gas: 70.0, nearPort: true, trend: 'stable' },
+    { id: 'fuel-3', name: 'Iloilo North Marine Fuel', area: 'Ajuy, Iloilo', lat: 11.171, lng: 123.016, diesel: 57.2, gas: 71.5, nearPort: false, trend: 'rising' },
+    { id: 'fuel-4', name: 'Guimaras Shoreline Fuels', area: 'Jordan, Guimaras', lat: 10.66, lng: 122.6, diesel: 56.8, gas: 70.9, nearPort: true, trend: 'stable' },
+  ];
+}
+
+export function getFuelTrendLabel(trend) {
+  if (trend === 'dropping') return 'Dropping';
+  if (trend === 'rising') return 'Rising';
+  return 'Stable';
+}
+
+export function cacheFuelSnapshot(stations) {
+  localStorage.setItem(
+    fuelCacheKey,
+    JSON.stringify({ stations, cachedAt: new Date().toISOString() })
+  );
+}
+
+export function loadFuelSnapshot() {
+  try {
+    const raw = localStorage.getItem(fuelCacheKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function hasGoogleMapsKey() {
